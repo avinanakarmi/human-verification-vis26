@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Human Verification in the Age of AI Agents — IEEE VIS 2026</title>
+<meta name="description" content="Collaborative meetup board: who, when and what of human verification of AI agents' work.">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --ink: #1f2937;
+  --muted: #5b6676;
+  --line: #e5e7eb;
+  --soft: #f9fafb;
+  --who: #fff1a6; --who-bar: #b8860b;
+  --when: #dbe8fd; --when-bar: #3f6fb5;
+  --what: #dceedd; --what-bar: #4a8452;
+  --focus: #2563eb;
+  --danger: #b42318;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.45 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 64px; }
+
+.eyebrow { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-size: clamp(24px, 5.2vw, 36px); line-height: 1.15; margin: 6px 0 8px; letter-spacing: -.01em; }
+.lede { color: var(--muted); margin: 0; max-width: 70ch; }
+
+.steps { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 12px; }
+.steps li { display: grid; grid-template-columns: 28px 1fr; }
+.steps .n { color: var(--muted); font-size: 12px; padding-top: 3px; font-variant-numeric: tabular-nums; }
+.steps b { display: block; font-size: 14px; }
+.steps span.d { color: var(--muted); font-size: 13px; }
+
+.bar {
+  position: sticky; top: 0; z-index: 5; background: rgba(243,244,246,.94); backdrop-filter: blur(6px);
+  margin: 16px -16px 12px; padding: 8px 16px; display: flex; gap: 8px; align-items: center;
+  overflow-x: auto; border-bottom: 1px solid var(--line);
+}
+.bar a {
+  flex: none; text-decoration: none; color: var(--ink); font-size: 13px; font-weight: 600;
+  padding: 8px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line);
+}
+.bar { scrollbar-width: none; }
+.bar::-webkit-scrollbar { display: none; }
+.status { margin-left: auto; flex: none; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  position: sticky; right: -16px; background: var(--bg); padding: 8px 0 8px 10px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; }
+.status[data-s="live"] .dot { background: #16a34a; }
+.status[data-s="offline"] .dot { background: #d97706; }
+
+.banner { background: #fff7e0; border: 1px solid #f0d58a; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
+.banner[hidden] { display: none; }
+
+.me { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+.me input { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--card); min-width: 0; width: 200px; font-size: 16px; }
+
+.cols { display: grid; gap: 12px; }
+.card { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+.sec::before { content: ""; display: block; width: 22px; height: 3px; border-radius: 2px; background: var(--c-bar); margin-bottom: 10px; }
+.sec[data-s="who"] { --c: var(--who); --c-bar: var(--who-bar); }
+.sec[data-s="when"] { --c: var(--when); --c-bar: var(--when-bar); }
+.sec[data-s="what"] { --c: var(--what); --c-bar: var(--what-bar); }
+h2 { margin: 0; font-size: 22px; letter-spacing: .01em; }
+.q { margin: 4px 0 12px; font-size: 15px; font-weight: 500; }
+.hint { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 0; }
+.note, .add {
+  display: flex; flex-direction: column; justify-content: space-between; text-align: left;
+  min-height: 88px; width: 100%; padding: 8px; border: 0; border-radius: 4px; cursor: pointer;
+  font-size: 13px; line-height: 1.3; overflow-wrap: anywhere;
+  box-shadow: 0 1px 2px rgba(16,24,40,.12);
+}
+.note[data-s="who"] { background: var(--who); }
+.note[data-s="when"] { background: var(--when); }
+.note[data-s="what"] { background: var(--what); }
+.note .t { white-space: pre-wrap; }
+.note .m { margin-top: 6px; font-size: 11px; color: #4b5563; display: flex; flex-wrap: wrap; gap: 4px; }
+.note .tag { background: rgba(255,255,255,.7); border-radius: 3px; padding: 0 4px; }
+.add {
+  background: var(--c); opacity: .75; align-items: center; justify-content: center; text-align: center;
+  font-weight: 600; border: 1.5px dashed var(--c-bar); box-shadow: none; color: var(--ink);
+}
+.add:hover, .add:focus-visible { opacity: 1; }
+.empty { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+
+.s4 { margin-top: 12px; }
+.s4 h2 { font-size: 20px; }
+.s4 h2 .n { margin-right: 10px; }
+.s4 > p { color: var(--muted); font-size: 14px; margin: 4px 0 14px; }
+.s4grid { display: grid; gap: 14px; }
+.clusters { display: grid; gap: 12px; }
+.cluster { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.drop { background: var(--soft); border: 1.5px dashed var(--line); border-radius: 8px; padding: 10px; }
+.drop.over { border-color: var(--focus); background: #eef4ff; }
+.drop .notes { margin-top: 10px; min-height: 60px; }
+label.f { display: block; font-size: 12px; color: var(--muted); }
+label.f.strong { color: var(--ink); font-weight: 600; font-size: 13px; }
+label.f input, label.f textarea {
+  display: block; width: 100%; margin-top: 4px; border: 1px solid var(--line); border-radius: 6px;
+  padding: 9px 10px; background: var(--card); font-size: 16px; resize: vertical;
+}
+.linkbtn { background: none; border: 0; padding: 6px 0; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; align-self: flex-start; }
+.btn {
+  border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 10px 14px;
+  font-weight: 600; font-size: 14px; cursor: pointer; min-height: 44px;
+}
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn.danger { color: var(--danger); }
+.collab { background: var(--bg); border-radius: 8px; padding: 14px; }
+.collab h3 { margin: 0; font-size: 15px; }
+.collab > p { margin: 2px 0 12px; font-size: 13px; color: var(--muted); }
+.pc { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; gap: 8px; margin-bottom: 10px; }
+.foot { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--muted); font-size: 13px; }
+
+dialog { border: 0; border-radius: 14px; padding: 0; width: min(440px, calc(100vw - 24px)); box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+dialog::backdrop { background: rgba(17,24,39,.45); }
+dialog form { padding: 16px; display: grid; gap: 12px; }
+dialog h3 { margin: 0; font-size: 17px; }
+dialog textarea { width: 100%; min-height: 120px; border: 0; border-radius: 6px; padding: 12px; font-size: 16px; resize: vertical; background: var(--c, var(--who)); }
+dialog select { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: var(--card); font-size: 16px; margin-top: 4px; }
+.count { font-size: 12px; color: var(--muted); text-align: right; margin-top: -8px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions .sp { flex: 1; }
+
+body.ro .add, body.ro .linkbtn, body.ro #addCluster, body.ro #addCollab, body.ro .me { display: none; }
+
+@media (min-width: 760px) {
+  .wrap { padding: 32px 24px 80px; }
+  .steps { grid-template-columns: repeat(3, 1fr); }
+  .bar { margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px; }
+  .clusters { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+@media (min-width: 1000px) {
+  .cols { grid-template-columns: repeat(3, 1fr); }
+  .s4grid { grid-template-columns: 1fr 320px; align-items: start; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">IEEE VIS 2026 / Collaborative meetup</div>
+    <h1>Human Verification in the Age of AI Agents</h1>
+    <p class="lede">As AI agents assist in visualization ideation and implementation, how do we enable humans to meaningfully oversee, verify, and intervene in their work?</p>
+    <ol class="steps">
+      <li><span class="n">01</span><div><b>Add your thoughts</b><span class="d">Use sticky notes under WHO, WHEN, or WHAT.</span></div></li>
+      <li><span class="n">02</span><div><b>Discuss and group</b><span class="d">Connect related ideas, including across sections.</span></div></li>
+      <li><span class="n">03</span><div><b>Find what’s next</b><span class="d">Identify open research questions and potential collaborations.</span></div></li>
+    </ol>
+  </header>
+
+  <nav class="bar" aria-label="Sections">
+    <a href="#who">WHO</a><a href="#when">WHEN</a><a href="#what">WHAT</a><a href="#questions">Questions</a><a href="#collab">Collaborations</a>
+    <span class="status" id="status" role="status" data-s="wait"><span class="dot" aria-hidden="true"></span><span id="statusText">Connecting…</span></span>
+  </nav>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="me">
+    <label for="me">Your name (optional, shown on your notes)</label>
+    <input id="me" maxlength="40" autocomplete="name" placeholder="Anonymous">
+  </div>
+
+  <main>
+    <div class="cols" id="cols"></div>
+
+    <section class="card s4" id="questions" aria-labelledby="h4">
+      <h2 id="h4"><span class="n">04</span>Emerging Research Questions</h2>
+      <p>Move notes from WHO, WHEN, and WHAT into shared clusters. Name each cluster, then formulate a research question. Tap a note to choose its cluster<span class="dnd"> (or drag it on a computer)</span>.</p>
+      <div class="s4grid">
+        <div>
+          <div class="clusters" id="clusters"></div>
+          <button class="btn" id="addCluster" type="button" style="margin-top:12px">+ Add cluster</button>
+        </div>
+        <aside class="collab" id="collab" aria-labelledby="hc">
+          <h3 id="hc">Potential collaborations</h3>
+          <p>Add names, shared interests, and a next step.</p>
+          <div id="collabs"></div>
+          <button class="btn" id="addCollab" type="button">+ Add collaboration</button>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div class="foot">
+    <button class="btn" id="export" type="button">Download a copy of the board</button>
+    <span id="footNote">Everything typed here is visible to everyone with the link.</span>
+  </div>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form method="dialog" id="dlgForm">
+    <h3 id="dlgTitle">New note</h3>
+    <label class="f" for="dlgText" style="position:absolute;left:-9999px">Note text</label>
+    <textarea id="dlgText" maxlength="280" placeholder="Write your thought…" required></textarea>
+    <div class="count" id="dlgCount" aria-hidden="true">0 / 280</div>
+    <label class="f">Group into cluster
+      <select id="dlgCluster"></select>
+    </label>
+    <div class="actions">
+      <button class="btn danger" type="button" id="dlgDelete">Delete</button>
+      <span class="sp"></span>
+      <button class="btn" type="button" id="dlgCancel">Cancel</button>
+      <button class="btn primary" type="submit" id="dlgSave">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="config.js"></script>
+<script type="module">
+const SECTIONS = [
+  { id: "who", title: "WHO", q: "Who should be responsible for verifying AI agents’ work?" },
+  { id: "when", title: "WHEN", q: "When should humans intervene or take over?" },
+  { id: "what", title: "WHAT", q: "What should AI agents present to support verification: text, charts, dashboards?" },
+];
+const FIXED_CLUSTERS = ["c1", "c2", "c3"];
+const FIXED_COLLABS = ["p1", "p2", "p3"];
+const READ_ONLY = !!window.BOARD_READ_ONLY;
+const $ = (id) => document.getElementById(id);
+const el = (tag, props = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") e.className = v;
+    else if (k === "data") Object.assign(e.dataset, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids) e.append(k);
+  return e;
+};
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+let state = { notes: {}, clusters: {}, collabs: {} };
+let store;
+
+/* ---------- storage backends ---------- */
+function setPath(obj, path, val) {
+  const ks = path.split("/");
+  let o = obj;
+  for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]] ??= {};
+  if (val === null) delete o[ks.at(-1)]; else o[ks.at(-1)] = val;
+}
+function localStore(onChange) {
+  const KEY = "hv-board-demo";
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  let data = read();
+  let ch = null;
+  try { ch = new BroadcastChannel(KEY); ch.onmessage = () => { data = read(); onChange(data); }; } catch {}
+  queueMicrotask(() => onChange(data));
+  return {
+    write(path, val) {
+      setPath(data, path, val);
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {}
+      ch?.postMessage(1);
+      onChange(data);
+    },
+  };
+}
+async function firebaseStore(config, onChange, onConn) {
+  const V = "10.12.2";
+  const [{ initializeApp }, db] = await Promise.all([
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`),
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-database.js`),
+  ]);
+  const database = db.getDatabase(initializeApp(config));
+  db.onValue(db.ref(database, "board"), (snap) => onChange(snap.val() || {}), (err) => onConn(false, err));
+  db.onValue(db.ref(database, ".info/connected"), (snap) => onConn(!!snap.val()));
+  return {
+    write(path, val) {
+      return db.set(db.ref(database, "board/" + path), val).catch((e) => {
+        setStatus("offline", "Couldn’t save — check connection");
+        console.error(e);
+      });
+    },
+  };
+}
+function setStatus(s, text) { $("status").dataset.s = s; $("statusText").textContent = text; }
+function onData(d) {
+  state = { notes: d.notes || {}, clusters: d.clusters || {}, collabs: d.collabs || {} };
+  render();
+}
+
+/* ---------- rendering ---------- */
+const clusterIds = () => [
+  ...FIXED_CLUSTERS,
+  ...Object.keys(state.clusters).filter((k) => !FIXED_CLUSTERS.includes(k))
+    .sort((a, b) => (state.clusters[a].ts || 0) - (state.clusters[b].ts || 0)),
+];
+const collabIds = () => [
+  ...FIXED_COLLABS,
+  ...Object.keys(state.collabs).filter((k) => !FIXED_COLLABS.includes(k))
+    .sort((a, b) => (state.collabs[a].ts || 0) - (state.collabs[b].ts || 0)),
+];
+const clusterLabel = (id) => (state.clusters[id]?.name || "").trim() || "Cluster " + (clusterIds().indexOf(id) + 1);
+const sortedNotes = () => Object.entries(state.notes)
+  .filter(([, n]) => n && typeof n.text === "string")
+  .sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0));
+
+function noteButton(id, n, inCluster) {
+  const meta = el("span", { class: "m" });
+  if (inCluster) meta.append(el("span", { class: "tag" }, (n.section || "").toUpperCase()));
+  else if (n.cluster && clusterIds().includes(n.cluster)) meta.append(el("span", { class: "tag" }, "→ " + clusterLabel(n.cluster)));
+  if (n.author) meta.append(el("span", {}, n.author));
+  const b = el("button", {
+    class: "note", type: "button", data: { s: n.section, id },
+    draggable: READ_ONLY ? false : "true",
+    "aria-label": `${(n.section || "").toUpperCase()} note${n.author ? " by " + n.author : ""}: ${n.text}${READ_ONLY ? "" : ". Edit"}`,
+    onclick: () => { if (!READ_ONLY) openDialog(n.section, id); },
+    ondragstart: (e) => e.dataTransfer.setData("text/plain", id),
+  }, el("span", { class: "t" }, n.text));
+  if (meta.childNodes.length) b.append(meta);
+  return el("li", {}, b);
+}
+
+function buildSections() {
+  for (const s of SECTIONS) {
+    $("cols").append(el("section", { class: "card sec", id: s.id, data: { s: s.id }, "aria-labelledby": "h-" + s.id },
+      el("h2", { id: "h-" + s.id }, s.title),
+      el("p", { class: "q" }, s.q),
+      el("p", { class: "hint" }, "Brainstorm / Group related ideas"),
+      el("ul", { class: "notes", id: "notes-" + s.id }),
+    ));
+  }
+}
+
+function renderNotes() {
+  const all = sortedNotes();
+  for (const s of SECTIONS) {
+    const ul = $("notes-" + s.id);
+    const items = all.filter(([, n]) => n.section === s.id).map(([id, n]) => noteButton(id, n, false));
+    if (!READ_ONLY) {
+      items.push(el("li", {}, el("button", { class: "add", type: "button", onclick: () => openDialog(s.id, null) }, "+ Add note")));
+    } else if (!items.length) items.push(el("li", { class: "empty" }, "No notes."));
+    ul.replaceChildren(...items);
+  }
+  for (const cid of clusterIds()) {
+    const ul = document.querySelector(`#cl-${cid} .notes`);
+    if (!ul) continue;
+    const items = all.filter(([, n]) => n.cluster === cid).map(([id, n]) => noteButton(id, n, true));
+    ul.replaceChildren(...items);
+    document.querySelector(`#cl-${cid} .empty`).hidden = items.length > 0;
+  }
+}
+
+function field(label, path, { area, max, cls } = {}) {
+  const input = el(area ? "textarea" : "input", { data: { path }, maxlength: max, rows: area ? 3 : null, readonly: READ_ONLY });
+  let t;
+  input.addEventListener("input", () => {
+    clearTimeout(t);
+    t = setTimeout(() => store.write(path, input.value), 350);
+  });
+  input.addEventListener("blur", () => { clearTimeout(t); if (!READ_ONLY && input.value !== (getPath(path) || "")) store.write(path, input.value); });
+  return el("label", { class: "f " + (cls || "") }, label, input);
+}
+const getPath = (path) => path.split("/").reduce((o, k) => (o ? o[k] : undefined), state);
+
+function syncKeyed(container, ids, prefix, make) {
+  const want = new Set(ids.map((i) => prefix + i));
+  for (const c of [...container.children]) if (!want.has(c.id)) c.remove();
+  ids.forEach((id, i) => {
+    let node = document.getElementById(prefix + id);
+    if (!node) { node = make(id, i); node.id = prefix + id; }
+    if (container.children[i] !== node) container.insertBefore(node, container.children[i] || null);
+  });
+}
+
+function makeCluster(id) {
+  const drop = el("div", { class: "drop" },
+    field("Cluster name", `clusters/${id}/name`, { max: 80 }),
+    el("ul", { class: "notes", "aria-label": "Notes in this cluster" }),
+    el("p", { class: "empty" }, "No notes yet. Tap a note above and choose this cluster."),
+  );
+  if (!READ_ONLY) {
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+    drop.addEventListener("drop", (e) => {
+      e.preventDefault(); drop.classList.remove("over");
+      const nid = e.dataTransfer.getData("text/plain");
+      if (state.notes[nid]) store.write(`notes/${nid}/cluster`, id);
+    });
+  }
+  const node = el("div", { class: "cluster" }, drop, field("Research question", `clusters/${id}/question`, { area: true, max: 500, cls: "strong" }));
+  if (!FIXED_CLUSTERS.includes(id)) {
+    node.append(el("button", { class: "linkbtn", type: "button", onclick: () => store.write(`clusters/${id}`, null) }, "Remove this cluster"));
+  }
+  return node;
+}
+function makeCollab(id) {
+  const node = el("div", { class: "pc" },
+    field("Names", `collabs/${id}/names`, { max: 200 }),
+    field("Shared interest", `collabs/${id}/interest`, { max: 300 }),
+    field("Next step", `collabs/${id}/next`, { max: 300 }),
+  );
+  if (!FIXED_COLLABS.includes(id)) {
+    node.append(el("button", { class: "linkbtn", type: "button", onclick: () => store.write(`collabs/${id}`, null) }, "Remove"));
+  }
+  return node;
+}
+
+function render() {
+  syncKeyed($("clusters"), clusterIds(), "cl-", makeCluster);
+  syncKeyed($("collabs"), collabIds(), "co-", makeCollab);
+  for (const input of document.querySelectorAll("[data-path]")) {
+    if (input === document.activeElement) continue; // don't clobber what someone is typing
+    const v = getPath(input.dataset.path) || "";
+    if (input.value !== v) input.value = v;
+  }
+  renderNotes();
+}
+
+/* ---------- note dialog ---------- */
+const dlg = $("dlg");
+let editing = null; // { section, id }
+function openDialog(section, id) {
+  const n = id ? state.notes[id] : null;
+  editing = { section, id };
+  $("dlgTitle").textContent = (n ? "Edit " : "New ") + section.toUpperCase() + " note";
+  $("dlgText").value = n?.text || "";
+  $("dlgText").style.setProperty("--c", `var(--${section})`);
+  $("dlgCount").textContent = `${$("dlgText").value.length} / 280`;
+  $("dlgDelete").hidden = !n;
+  $("dlgDelete").textContent = "Delete";
+  const sel = $("dlgCluster");
+  sel.replaceChildren(el("option", { value: "" }, "Not grouped yet"), ...clusterIds().map((c) => el("option", { value: c }, clusterLabel(c))));
+  sel.value = n?.cluster && clusterIds().includes(n.cluster) ? n.cluster : "";
+  dlg.showModal();
+  $("dlgText").focus();
+}
+$("dlgText").addEventListener("input", (e) => { $("dlgCount").textContent = `${e.target.value.length} / 280`; });
+$("dlgCancel").addEventListener("click", () => dlg.close());
+$("dlgDelete").addEventListener("click", (e) => {
+  if (e.target.textContent === "Delete") { e.target.textContent = "Tap again to delete"; return; }
+  store.write(`notes/${editing.id}`, null);
+  dlg.close();
+});
+$("dlgForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("dlgText").value.trim();
+  if (!text) return;
+  const prev = editing.id ? state.notes[editing.id] : null;
+  const note = {
+    section: editing.section, text,
+    cluster: $("dlgCluster").value,
+    author: prev ? (prev.author || "") : $("me").value.trim(),
+    ts: prev?.ts || Date.now(),
+  };
+  store.write(`notes/${editing.id || uid()}`, note);
+  dlg.close();
+});
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+/* ---------- misc ---------- */
+try { $("me").value = localStorage.getItem("hv-name") || ""; } catch {}
+$("me").addEventListener("input", (e) => { try { localStorage.setItem("hv-name", e.target.value); } catch {} });
+$("addCluster").addEventListener("click", () => store.write(`clusters/${uid()}`, { name: "", question: "", ts: Date.now() }));
+$("addCollab").addEventListener("click", () => store.write(`collabs/${uid()}`, { names: "", interest: "", next: "", ts: Date.now() }));
+
+$("export").addEventListener("click", () => {
+  const L = ["# Human Verification in the Age of AI Agents — IEEE VIS 2026", "", `Exported ${new Date().toLocaleString()}`, ""];
+  const all = sortedNotes();
+  const line = ([, n]) => `- ${n.text.replace(/\s*\n\s*/g, " ")}${n.author ? ` — ${n.author}` : ""}`;
+  for (const s of SECTIONS) {
+    L.push(`## ${s.title}: ${s.q}`, "");
+    const ns = all.filter(([, n]) => n.section === s.id);
+    L.push(...(ns.length ? ns.map(line) : ["(no notes)"]), "");
+  }
+  L.push("## Emerging Research Questions", "");
+  for (const c of clusterIds()) {
+    const ns = all.filter(([, n]) => n.cluster === c);
+    const q = (state.clusters[c]?.question || "").trim();
+    if (!ns.length && !q && !(state.clusters[c]?.name || "").trim()) continue;
+    L.push(`### ${clusterLabel(c)}`, "", `Research question: ${q || "(none)"}`, "");
+    L.push(...ns.map(([id, n]) => `- [${n.section.toUpperCase()}] ${line([id, n]).slice(2)}`), "");
+  }
+  L.push("## Potential collaborations", "");
+  for (const c of collabIds()) {
+    const p = state.collabs[c] || {};
+    if (!p.names && !p.interest && !p.next) continue;
+    L.push(`- Names: ${p.names || ""}`, `  Shared interest: ${p.interest || ""}`, `  Next step: ${p.next || ""}`, "");
+  }
+  const a = el("a", { href: URL.createObjectURL(new Blob([L.join("\n")], { type: "text/markdown" })), download: "human-verification-meetup.md" });
+  document.body.append(a); a.click(); a.remove();
+});
+
+/* ---------- start ---------- */
+buildSections();
+if (READ_ONLY) {
+  document.body.classList.add("ro");
+  $("footNote").textContent = "This board is now read-only. Thanks for taking part!";
+}
+if (window.FIREBASE_CONFIG) {
+  const timer = setTimeout(() => setStatus("offline", "Still connecting…"), 10000);
+  try {
+    store = await firebaseStore(window.FIREBASE_CONFIG, (d) => { clearTimeout(timer); onData(d); }, (ok) => {
+      setStatus(ok ? "live" : "offline", ok ? (READ_ONLY ? "Saved · read-only" : "Live · saved automatically") : "Offline — reconnecting…");
+    });
+  } catch (e) {
+    console.error(e);
+    setStatus("offline", "Couldn’t connect");
+    $("banner").hidden = false;
+    $("banner").textContent = "Couldn’t reach the shared board. Check your connection and reload.";
+    store = { write() {} };
+  }
+} else {
+  setStatus("wait", "Demo mode");
+  $("banner").hidden = false;
+  $("banner").textContent = "Demo mode: notes are kept on this device only and are not shared yet.";
+  store = localStore(onData);
+}
+render();
+</script>
+</body>
+</html>

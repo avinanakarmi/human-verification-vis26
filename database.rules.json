@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "board": {
+      ".read": true,
+      "notes": {
+        "$id": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['section', 'text', 'ts']) && newData.child('text').isString() && newData.child('text').val().length <= 500 && newData.child('section').isString() && newData.child('section').val().length <= 10"
+        }
+      },
+      "clusters": {
+        "$id": {
+          ".write": true,
+          "$field": {
+            ".validate": "newData.isNumber() || (newData.isString() && newData.val().length <= 1000)"
+          }
+        }
+      },
+      "collabs": {
+        "$id": {
+          ".write": true,
+          "$field": {
+            ".validate": "newData.isNumber() || (newData.isString() && newData.val().length <= 1000)"
+          }
+        }
+      }
+    }
+  }
+}
